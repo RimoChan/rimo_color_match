@@ -37,7 +37,7 @@
 
 ## 使用方法
 
-你需要1个Python以上版本，然后这样用pip安装——
+你需要1个Python，然后这样用pip安装——
 
 ```sh
 pip install git+https://github.com/RimoChan/rimo_color_match.git
