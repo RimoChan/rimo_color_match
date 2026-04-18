@@ -12,7 +12,7 @@ def 图像相似度(img_a: torch.Tensor, img_b: torch.Tensor, eps=1e-2) -> float
     return match.float().flatten(1).mean(dim=1)
 
 
-def 匹配颜色(img_a: torch.Tensor, img_b: torch.Tensor, 搜索次数=2000, d=0.01, size=128, seed=1, batch_size=512) -> torch.Tensor:
+def 匹配颜色(img_a: torch.Tensor, img_b: torch.Tensor, 搜索次数=2000, d=0.01, size=128, seed=1, batch_size=512):
     device = img_a.device
 
     generator = torch.Generator(device=device)
@@ -20,7 +20,7 @@ def 匹配颜色(img_a: torch.Tensor, img_b: torch.Tensor, 搜索次数=2000, d=
 
     高, 宽, C = img_a.shape
 
-    img_a_original_flat = img_a.view(-1, 3)
+    img_a_original_flat = img_a.reshape(-1, 3)
 
     if max(高, 宽) > size:
         scale = size / max(高, 宽)
@@ -29,8 +29,8 @@ def 匹配颜色(img_a: torch.Tensor, img_b: torch.Tensor, 搜索次数=2000, d=
         img_a = F.interpolate(img_a.permute(2, 0, 1).unsqueeze(0), size=(new高, new宽), mode='bilinear', align_corners=False).squeeze(0).permute(1, 2, 0)
         img_b = F.interpolate(img_b.permute(2, 0, 1).unsqueeze(0), size=(new高, new宽), mode='bilinear', align_corners=False).squeeze(0).permute(1, 2, 0)
 
-    img_a_flat = img_a.view(-1, 3)
-    img_b_flat = img_b.view(-1, 3)
+    img_a_flat = img_a.reshape(-1, 3)
+    img_b_flat = img_b.reshape(-1, 3)
 
     当前_W = torch.eye(3, device=device)
     当前_B = torch.zeros(3, device=device)
