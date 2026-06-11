@@ -5,14 +5,23 @@ import torch.nn.functional as F
 from torchvision.io import read_image
 from torchvision.utils import save_image
 
+try:
+    import triton
+except Exception:
+    有triton = False
+else:
+    有triton = True
 
-def 图像相似度(img_a: torch.Tensor, img_b: torch.Tensor, eps=1e-2) -> float:
-    diff = torch.abs(img_a - img_b)
-    match = (diff <= eps).all(dim=-1)
-    return match.float().flatten(1).mean(dim=1)
 
+def 匹配颜色(img_a: torch.Tensor, img_b: torch.Tensor, 搜索次数=2000, d=0.01, size=128, seed=1, batch_size=512, use_triton='auto'):
+    if use_triton == 'auto':
+        use_triton = 有triton
+        print(f'使用Triton: {有triton}')
+    if use_triton:
+        from .op_triton import 图像相似度_triton as 图像相似度, mma_clamp_triton as mc
+    else:
+        from .op_torch import 图像相似度_torch as 图像相似度, mma_clamp_torch as mc
 
-def 匹配颜色(img_a: torch.Tensor, img_b: torch.Tensor, 搜索次数=2000, d=0.01, size=128, seed=1, batch_size=512):
     device = img_a.device
 
     generator = torch.Generator(device=device)
@@ -34,23 +43,21 @@ def 匹配颜色(img_a: torch.Tensor, img_b: torch.Tensor, 搜索次数=2000, d=
 
     当前_W = torch.eye(3, device=device)
     当前_B = torch.zeros(3, device=device)
-    
-    最大图像相似度 = 图像相似度(img_a.unsqueeze(0), img_b)
+
+    最大图像相似度 = 图像相似度(img_a_flat.unsqueeze(0), img_b_flat.unsqueeze(0))
     for _ in tqdm(range(搜索次数), desc="搜索颜色变换矩阵"):
         dW = d * torch.randn(batch_size, 3, 3, device=device, generator=generator)
         dB = d * torch.randn(batch_size, 3, device=device, generator=generator)
-        
+
         测试_W = 当前_W + dW
         测试_B = 当前_B + dB
-        
-        img_b2_flat = torch.matmul(img_a_flat, 测试_W) + 测试_B.unsqueeze(1)
-        img_b2_flat = torch.clamp(img_b2_flat, 0.0, 1.0)
+
+        img_b2_flat = mc(img_a_flat, 测试_W, 测试_B)
         sims = 图像相似度(img_b_flat.unsqueeze(0), img_b2_flat)
         max_sim, max_idx = torch.max(sims, dim=0)
         t = max_sim.item()
         if t > 最大图像相似度:
             最大图像相似度 = t
-            print('更新', 最大图像相似度)
             当前_W = 测试_W[max_idx]
             当前_B = 测试_B[max_idx]
 
