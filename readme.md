@@ -77,7 +77,19 @@ def 匹配颜色(img_a: torch.Tensor, img_b: torch.Tensor, 搜索次数=2000, d=
 - 第1个是返回的图片，是`Tensor`，和输入图片的尺寸相同。
 - 剩下2个是W和B，1般情况下没有什么用，不过可以用它们做1些高级的操作，比如视频首尾帧生成时用第1帧做匹配，然后用W和B把整个视频都做完颜色匹配。
 
-此外，这个仓库里还有1个ComfyUI的Node，可以直接下载回去用，操作方法是在ComfyUI的Python环境里执行上面的`pip install`，然后把`ComfyUI-RimoColorMatch`文件夹放进`custom_nodes`就可以了！
+
+## ComfyUI使用
+
+这个仓库里也附带了1个ComfyUI的Node，可以直接下载回去用！
+
+操作方法是这样:
+
+- 在ComfyUI的Python环境里执行上面的`pip install`。
+- 把这个仓库clone回去，把`ComfyUI-RimoColorMatch`文件夹放进`custom_nodes`就可以了。
+
+不过这样安装是没有triton的，需要自己手动安装，因为大家的torch版本不1样所以没有办法写requirements。
+
+如果是windows用户，也可以装这个[triton-windows](https://github.com/triton-lang/triton-windows)，如果装不来的话，那不装也可以，慢1点也不是不能用！
 
 
 ## 结束
