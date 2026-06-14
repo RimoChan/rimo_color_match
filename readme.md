@@ -26,9 +26,16 @@
 
 ## 速度
 
-这个算法收敛不是肯定最快的，不过速度还算能接受。在默认配置下，4060ti上运行需要10秒，在4090上需要2秒。
+这个算法收敛不是肯定最快的，不过速度的话还算可以。
 
-不过，这个代码自带2个高度优化的triton算子，所以如果你有安装triton的话，它就会变得非常快，在4060ti上只要1.2秒！4090上还没测，那台机器在训练暂时用不了。
+在默认配置下做了一些测试:
+
+|           | 4060Ti | 4090 |
+|:---|---:|---:|
+| 没装triton |  10秒  |  2.5秒 | 
+| 有装triton |  1.2秒 |  0.7秒 |  
+
+因为这个代码里有实现2个高度优化的triton算子，所以如果你有安装triton的话，推理就会变得非常快！
 
 
 ## 看看效果
@@ -53,7 +60,7 @@ pip install git+https://github.com/RimoChan/rimo_color_match.git
 接口是这样的:
 
 ```python
-def 匹配颜色(img_a: torch.Tensor, img_b: torch.Tensor, 搜索次数=2000, d=0.01, size=128, seed=1, batch_size=512, use_triton='auto') -> torch.Tensor:
+def 匹配颜色(img_a: torch.Tensor, img_b: torch.Tensor, 搜索次数=2000, d=0.01, size=128, seed=1, batch_size=512, use_triton='auto'):
     ...
 ```
 
@@ -63,7 +70,7 @@ def 匹配颜色(img_a: torch.Tensor, img_b: torch.Tensor, 搜索次数=2000, d=
 - `size`是会把图像resize到这个大小再做匹配，越小匹配越快。
 - `seed`是随机种子，对，这显然是1个随机算法。
 - `batch_size`是每次扰动时会在多少个不同的扰动中选出最好的那1个。
-- `use_triton`指定是否要使用triton，默认情况下是如果能import的话就会用。
+- `use_triton`指定是否要使用triton，默认行为是如果能import的话就会用。
 
 返回值有3个: 
 
