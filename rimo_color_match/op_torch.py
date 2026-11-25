@@ -10,3 +10,7 @@ def 图像相似度_torch(img_a: torch.Tensor, img_b: torch.Tensor, eps=1e-2) ->
 def mma_clamp_torch(A, B, C):
     t = torch.matmul(A, B) + C.unsqueeze(1)
     return torch.clamp(t, 0.0, 1.0)
+
+
+def mma_clamp_图像相似度_torch(img_a: torch.Tensor, img_b: torch.Tensor, W: torch.Tensor, B: torch.Tensor, eps=1e-2) -> torch.Tensor:
+    return 图像相似度_torch(img_b.unsqueeze(0), mma_clamp_torch(img_a, W, B), eps=eps)

@@ -17,10 +17,11 @@ def 匹配颜色(img_a: torch.Tensor, img_b: torch.Tensor, 搜索次数=2000, d=
     if use_triton == 'auto':
         use_triton = 有triton
         print(f'使用Triton: {有triton}')
+    from .op_torch import 图像相似度_torch as 图像相似度
     if use_triton:
-        from .op_triton import 图像相似度_triton as 图像相似度, mma_clamp_triton as mc
+        from .op_triton import mma_clamp_图像相似度_triton as mc_图像相似度
     else:
-        from .op_torch import 图像相似度_torch as 图像相似度, mma_clamp_torch as mc
+        from .op_torch import mma_clamp_图像相似度_torch as mc_图像相似度
 
     device = img_a.device
 
@@ -52,8 +53,7 @@ def 匹配颜色(img_a: torch.Tensor, img_b: torch.Tensor, 搜索次数=2000, d=
         测试_W = 当前_W + dW
         测试_B = 当前_B + dB
 
-        img_b2_flat = mc(img_a_flat, 测试_W, 测试_B)
-        sims = 图像相似度(img_b_flat.unsqueeze(0), img_b2_flat)
+        sims = mc_图像相似度(img_a_flat, img_b_flat, 测试_W, 测试_B)
         max_sim, max_idx = torch.max(sims, dim=0)
         t = max_sim.item()
         if t > 最大图像相似度:
@@ -62,8 +62,6 @@ def 匹配颜色(img_a: torch.Tensor, img_b: torch.Tensor, 搜索次数=2000, d=
             当前_B = 测试_B[max_idx]
 
     print(f"{最大图像相似度=}")
-    print("最佳 W 矩阵:\n", 当前_W.cpu().numpy())
-    print("最佳 B 向量:\n", 当前_B.cpu().numpy())
 
     最终_img = torch.clamp(torch.matmul(img_a_original_flat, 当前_W) + 当前_B, 0.0, 1.0).view(高, 宽, 3)
     return 最终_img, 当前_W, 当前_B
